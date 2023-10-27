@@ -5,17 +5,30 @@ class App extends Component {
   state = {
     empresas: [],
     novaEmpresa: {
-      nome: '',
+      nomeCliente: '',
+      senha: '',
+      razaoSocial: '',
+      cnpj: '',
+      cep: '',
       endereco: '',
+      numero: '',
       telefone: '',
+      email: '',
     },
     cnpjConsulta: '',
     empresaEdit: {
       id: null,
-      nome: '',
+      razaoSocial: '',
+      cnpj: '',
+      cep: '',
       endereco: '',
+      numero: '',
       telefone: '',
+      email: '',
     },
+    viaCepData: {
+      endereco: ''
+    }
   };
 
   componentDidMount() {
@@ -59,7 +72,17 @@ class App extends Component {
       .then(() => {
         this.fetchEmpresas();
         this.setState({
-          novaEmpresa: { nome: '', endereco: '', telefone: '' },
+          novaEmpresa: {
+            nomeCliente: '',
+            senha: '',
+            razaoSocial: '',
+            cnpj: '',
+            cep: '',
+            endereco: '',
+            numero: '',
+            telefone: '',
+            email: '',
+          },
         });
       })
       .catch((error) => {
@@ -81,7 +104,18 @@ class App extends Component {
     axios.put(`http://localhost:3000/empresas/${this.state.empresaEdit.id}`, this.state.empresaEdit)
       .then(() => {
         this.fetchEmpresas();
-        this.setState({ empresaEdit: { id: null, nome: '', endereco: '', telefone: '' } });
+        this.setState({
+          empresaEdit: {
+            id: null,
+            razaoSocial: '',
+            cnpj: '',
+            cep: '',
+            endereco: '',
+            numero: '',
+            telefone: '',
+            email: '',
+          },
+        });
       })
       .catch((error) => {
         console.error(error);
@@ -98,6 +132,27 @@ class App extends Component {
       });
   };
 
+  // Função para buscar endereço via CEP
+  buscarEnderecoViaCep = (cep) => {
+    axios.get(`http://localhost:3000/viacep/${cep}`)
+      .then((response) => {
+        this.setState({
+          viaCepData: {
+            endereco: response.data.endereco
+          }
+        });
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  // Função para preencher automaticamente o campo de endereço
+  preencherEnderecoViaCep = () => {
+    const { cep } = this.state.novaEmpresa;
+    this.buscarEnderecoViaCep(cep);
+  };
+
   render() {
     return (
       <div>
@@ -106,23 +161,65 @@ class App extends Component {
         <h2>Criar uma nova empresa</h2>
         <input
           type="text"
-          name="nome"
-          placeholder="Nome"
-          value={this.state.novaEmpresa.nome}
+          name="nomeCliente"
+          placeholder="Nome do Cliente"
+          value={this.state.novaEmpresa.nomeCliente}
+          onChange={this.handleInputChange}
+        />
+        <input
+          type="password"
+          name="senha"
+          placeholder="Senha"
+          value={this.state.novaEmpresa.senha}
+          onChange={this.handleInputChange}
+        />
+        <input
+          type="text"
+          name="razaoSocial"
+          placeholder="Nome da empresa (Razão Social)"
+          value={this.state.novaEmpresa.razaoSocial}
+          onChange={this.handleInputChange}
+        />
+        <input
+          type="text"
+          name="cnpj"
+          placeholder="CNPJ (XX.XXX.XXX/XXXX-XX)"
+          value={this.state.novaEmpresa.cnpj}
+          onChange={this.handleInputChange}
+        />
+        <input
+          type="text"
+          name="cep"
+          placeholder="CEP (XXXXX-XXX)"
+          value={this.state.novaEmpresa.cep}
           onChange={this.handleInputChange}
         />
         <input
           type="text"
           name="endereco"
-          placeholder="Endereço"
+          placeholder="Endereço (XXXXX)"
           value={this.state.novaEmpresa.endereco}
           onChange={this.handleInputChange}
         />
         <input
           type="text"
+          name="numero"
+          placeholder="Número (XXX)"
+          value={this.state.novaEmpresa.numero}
+          onChange={this.handleInputChange}
+        />
+        <input
+          type="text"
           name="telefone"
-          placeholder="Telefone"
+          placeholder="Telefone (+ 55 (XX) XXXXX-XXXX)"
           value={this.state.novaEmpresa.telefone}
+          onChange={this.handleInputChange}
+        />
+        <input
+          type="email"
+          name="email"
+          placeholder="Email"
+          value={this.state.novaEmpresa.email}
           onChange={this.handleInputChange}
         />
         <button onClick={this.criarEmpresa}>Criar</button>
@@ -131,7 +228,7 @@ class App extends Component {
         <ul>
           {this.state.empresas.map((empresa) => (
             <li key={empresa.id}>
-              {empresa.nome} - {empresa.endereco}
+              {empresa.razaoSocial} - {empresa.endereco}
               <button onClick={() => this.excluirEmpresa(empresa.id)}>Excluir</button>
             </li>
           ))}
@@ -156,24 +253,52 @@ class App extends Component {
         />
         <input
           type="text"
-          name="nome"
-          placeholder="Novo Nome"
-          value={this.state.empresaEdit.nome}
+          name="razaoSocial"
+          placeholder="Nova Razão Social"
+          value={this.state.empresaEdit.razaoSocial}
           onChange={this.handleEditChange}
+        />
+        <input
+          type="text"
+          name="cnpj"
+          placeholder="CNPJ (XX.XXX.XXX/XXXX-XX)"
+          value={this.state.novaEmpresa.cnpj}
+          onChange={this.handleInputChange}
+        />
+        <input
+          type="text"
+          name="cep"
+          placeholder="CEP (XXXXX-XXX)"
+          value={this.state.novaEmpresa.cep}
+          onChange={this.handleInputChange}
         />
         <input
           type="text"
           name="endereco"
-          placeholder="Novo Endereço"
-          value={this.state.empresaEdit.endereco}
-          onChange={this.handleEditChange}
+          placeholder="Endereço (XXXXX)"
+          value={this.state.novaEmpresa.endereco}
+          onChange={this.handleInputChange}
+        />
+        <input
+          type="text"
+          name="numero"
+          placeholder="Número (XXX)"
+          value={this.state.novaEmpresa.numero}
+          onChange={this.handleInputChange}
         />
         <input
           type="text"
           name="telefone"
-          placeholder="Novo Telefone"
-          value={this.state.empresaEdit.telefone}
-          onChange={this.handleEditChange}
+          placeholder="Telefone (+ 55 (XX) XXXXX-XXXX)"
+          value={this.state.novaEmpresa.telefone}
+          onChange={this.handleInputChange}
+        />
+        <input
+          type="email"
+          name="email"
+          placeholder="Email"
+          value={this.state.novaEmpresa.email}
+          onChange={this.handleInputChange}
         />
         <button onClick={this.editarEmpresa}>Editar</button>
       </div>
